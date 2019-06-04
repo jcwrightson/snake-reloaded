@@ -4,30 +4,10 @@
 
 Demo: https://madebywrightson.com/snake-remastered
 
-##Usage:
+## Dev:
     
-JavaScript
+`npm start`
 
-    const game = new Snake()
-    game.init()
+## Build:
 
-
-Markup
-    
-    <div>
-        <canvas id="snake"></canvas>
-        <canvas id="pip"></canvas>
-        <canvas id="powerup"></canvas>
-    
-        <div class="splash">
-            <div>Level: <span id="level">0</span></div>
-            <div>Length: <span id="length"></span></div>
-            <div>FPS: <span id="frames"></span></div>
-            <div>High Score: <span id="highScore"></span></div>
-        </div>
-    </div>
-    
-    <div>
-        <div>Level: <span id="level">0</span></div>
-        <div>High Score: <span id="highScore"></span></div>
-    </div>
+`npm run build`
