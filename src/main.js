@@ -1,7 +1,7 @@
 "use strict";
 
 import Snake from './snake'
-import styles from '../style.scss'
+import '../style.scss'
 
 let useAI = false
 
