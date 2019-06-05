@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Gloria+Hallelujah|VT323&display=swap');
 html, body{
   margin: 0;
   padding: 0;
@@ -9,7 +10,7 @@ html, body{
 body{
   font-family: monospace;
   color: #e6e6e6;
-  background-color: #1d1d1d;
+  background-color: #111;
 }
 
 main.game{
@@ -32,13 +33,19 @@ main.game{
       font-size: 1.2rem;
       h1{
         margin: 2rem 0;
-        font-family: "Arial", serif;
+        font-family: "Gloria Hallelujah";
+        font-size: 4rem;
         color: #d93e46;
+        color: #00f70c;
       }
     }
 
     &.meta{
       margin-top: 1rem;
+      font-family: "VT323", monospace;
+      font-size: 1.5rem !important;
+      
+
     }
 
     &.meta, &.ai, &.buttons{
@@ -49,8 +56,9 @@ main.game{
       align-items: flex-start;
 
 
-      >div{
+      >div > span{
         flex-basis: 25%;
+        justify-content: center;
       }
 
     }
@@ -58,7 +66,7 @@ main.game{
 
   canvas, .splash{
     position: absolute;
-    //cursor: none;
+    cursor: none;
     user-select: none;
   }
 
@@ -105,6 +113,12 @@ footer{
 
 a, a:visited{
   color: inherit;
+  opacity: .5;
+
+  &:hover{
+    opacity: 1;
+  }
+
 }
 
 button {

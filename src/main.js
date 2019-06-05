@@ -18,11 +18,10 @@ const toggleAI = () => {
 }
 
 window.addEventListener("DOMContentLoaded", ()=>{
-	const game = new Snake()
-
-	game.init({
+	return Snake({
 		sounds: false,
-		startFPS: 12
+		startFPS: 15,
+		scaleFactor:15
 	})
 
 	const gW = (game.gameWidth * game.scaleFactor) - game.scaleFactor

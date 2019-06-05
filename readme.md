@@ -2,7 +2,7 @@
 
 ### A remake of the classic snake game with some added upgrades
 
-Demo: https://madebywrightson.com/snake-remastered
+Demo: https://madebywrightson.com/snake-reloaded
 
 ## Dev:
     
