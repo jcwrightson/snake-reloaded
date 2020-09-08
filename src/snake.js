@@ -581,7 +581,12 @@ const Snake = () => {
     getState,
     getCurrentDirection,
     toggleDirection,
+    isSnakeBody,
     init,
+    snakePosition,
+    moves,
+    gameWidth,
+    gameHeight,
   }
 }
 

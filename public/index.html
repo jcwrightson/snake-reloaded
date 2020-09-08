@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Snake Reloaded</title>
 </head>
+
 <body>
 
     <main class="game">
@@ -23,33 +25,34 @@
             </div>
 
             <div class="container meta">
-                <div>Level: <span id="level">0</span></div>
-                <!-- <div>Length: <span id="length"></span></div> -->
-                <!-- <div>FPS: <span id="frames"></span></div> -->
-                <div>High Score: <span id="highScore"></span></div>
+
             </div>
         </div>
 
-        
+
 
         <div class="container ai">
-            <div>Snake Position: <span id="snakePosition"></span></div>
-            <div>Next Move: <span id="currentMove"></span></div>
-            <div>Distance To Target: <span id="distance"></span></div>
-            <div>AI Move: <span id="move"></span></div>
+            <div class="block">
+                <div>Level: <span id="level">0</span></div>
+                <div>High Score: <span id="highScore"></span></div>
+                <div class="ai-elem">Snake Position: <span id="snakePosition"></span></div>
+                <div class="ai-elem">Distance To Target: <span id="distance"></span></div>
+                <div class="ai-elem">AI Move: <span id="move"></span></div>
+            </div>
+            <div class="block">
+                <button id="aiBtn">AI Off</button>
+            </div>
         </div>
 
-        <div class="container buttons">
-            <button onclick="toggleAI()" id="aiBtn">AI Off</button>
-        </div>
 
     </main>
 
     <footer>
         <div class="container">
-        <a href="https://jcwrightson.com/">madebywrightson</a>
+            <a href="https://jcwrightson.com/">madebywrightson</a>
         </div>
     </footer>
 
 </body>
+
 </html>
