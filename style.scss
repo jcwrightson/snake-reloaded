@@ -29,21 +29,21 @@ main.game{
 
     &.title{
       flex-direction: row;
-      //justify-content: flex-start;
       font-size: 1.2rem;
       h1{
         margin: 2rem 0;
         font-family: "Gloria Hallelujah";
-        font-size: 4rem;
+        font-size: 3rem;
         color: #d93e46;
-        color: #00f70c;
+        color: #00f7ad;
       }
     }
 
     &.meta{
       margin-top: 1rem;
       font-family: "VT323", monospace;
-      font-size: 1.5rem !important;
+      font-size: 1rem !important;
+      width: 100%;
       
 
     }
@@ -61,6 +61,11 @@ main.game{
         justify-content: center;
       }
 
+    }
+
+    &.meta{
+      position: absolute;
+      bottom:-10%;
     }
   }
 
