@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
   controller = ai(game)
 
   const switchOnAi = (controller) => {
-    document.getElementById('aiBtn').innerText = 'AI On'
+    document.getElementById('aiBtn').innerText = '(Suicidal) AI On'
     document.getElementById('aiBtn').classList.add('js-active') 
     for (const elem of document.getElementsByClassName('ai-elem')) {
       elem.classList.add('js-active')
