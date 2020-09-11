@@ -4,6 +4,16 @@ import Snake from './snake'
 import ai from './ai'
 import '../style.scss'
 
+const calcWidth = () => {
+  const w = Math.floor(window.innerWidth / 20 - (window.innerWidth * 0.01))
+  return w
+}
+
+const calcHeight = () => {
+  const h = Math.floor(window.innerHeight / 25 - (window.innerHeight * 0.01) )
+  return h
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   let useAI = false
   const game = Snake()
@@ -13,15 +23,18 @@ window.addEventListener('DOMContentLoaded', () => {
     sounds: false,
     startFPS: 10,
     scaleFactor: 15,
-    gameHeight: 30,
-    gameWidth: 60,
+    gameHeight: calcHeight(),
+    gameWidth: calcWidth() > 60 ? 60 : calcWidth(),
   })
 
   controller = ai(game)
 
+  let gamePixWidth = document.getElementById('snake').clientWidth
+  document.querySelector('main.game').style.width = gamePixWidth + 'px'
+
   const switchOnAi = (controller) => {
-    document.getElementById('aiBtn').innerText = '(Suicidal) AI On'
-    document.getElementById('aiBtn').classList.add('js-active') 
+    document.getElementById('aiBtn').innerText = 'AI On'
+    document.getElementById('aiBtn').classList.add('js-active')
     for (const elem of document.getElementsByClassName('ai-elem')) {
       elem.classList.add('js-active')
     }
@@ -48,10 +61,26 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  let turbo = 0
+  const toggleTurbo = () => {
+    document.querySelector('.turbo').classList.add('active')
+    turbo++
+    document.querySelector('.turbo').innerText=`Turbo X ${turbo}`
+    game.turbo(20)
+  }
+
+  const handleReset = () => {
+    turbo = 0
+    document.querySelector('.turbo').classList.remove('active')
+    document.querySelector('.turbo').innerText=`Turbo`
+    game.resetGame()
+  }
+
   document
     .getElementById('aiBtn')
     .addEventListener('click', () => toggleAI(controller))
-
+  document.getElementById('reset').addEventListener('click', handleReset)
+  document.getElementById('turbo').addEventListener('click', toggleTurbo)
   if (useAI) {
     switchOnAi(controller)
   }

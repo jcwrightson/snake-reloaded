@@ -25,13 +25,11 @@ const ai = (game) => {
     game.getState().gameHeight * game.getState().scaleFactor -
     game.getState().scaleFactor
 
-  let validMoves = []
-
   const withinBounds = (arr) => {
     return arr[0] <= gW && arr[0] >= 0 && arr[1] <= gH && arr[1] >= 0
   }
 
-  const nextVector = (move) => {
+  const nextPosition = (move) => {
     return [
       game.getState().snakePosition[0] +
         moveVector(move)[0] * game.getState().scaleFactor,
@@ -75,110 +73,140 @@ const ai = (game) => {
   }
 
   const calcD = (vector1, vector2) => {
-    return Math.abs(vector1[0] + vector1[1]) - (vector2[0] + vector2[1])
-    // return [
-    //     Math.abs(vector1[0] - vector2[0]),
-    //     Math.abs(vector1[1] - vector2[1])
-    // ]
+    const x2 = (vector2[0] - vector1[0]) * (vector2[0] - vector1[0]) // x2-x1 squared
+    const y2 = (vector2[1] - vector1[1]) * (vector2[1] - vector1[1])
+    return Math.round(
+      Math.floor(Math.sqrt(x2 + y2)) / game.getState().scaleFactor
+    )
   }
 
-  const calcD2T = (snakePosition) => {
-    if (game.getState().powerUpActive) {
-      return closestVector(
-        [
-          Math.abs(snakePosition[0] - game.getState().pipPosition[0]),
-          Math.abs(snakePosition[1] - game.getState().pipPosition[1]),
-        ],
-        [
-          Math.abs(snakePosition[0] - game.getState().powerUpPosition[0]),
-          Math.abs(snakePosition[1] - game.getState().powerUpPosition[1]),
-        ]
-      )
-    } else {
-      return [
-        Math.abs(snakePosition[0] - game.getState().pipPosition[0]),
-        Math.abs(snakePosition[1] - game.getState().pipPosition[1]),
-      ]
-    }
-  }
+  let squareMoves = [
+    ['up', 'right', 'down', 'left'],
+    ['down', 'right', 'up', 'left'],
+    ['up', 'left', 'down', 'right'],
+    ['down', 'left', 'up', 'right'],
+    ['left', 'up', 'right', 'down'],
+    ['left', 'down', 'right', 'up'],
+    ['right', 'up', 'left', 'down'],
+    ['right', 'down', 'left', 'up'],
+  ]
 
-  const isSquareMove = (moveDirection) => {
-    let mH = [...game.getState().moveHistory]
-    let mVs = [...moves]
-    let totalDistance = 0
+  const isSquareMove = (nextMove) => {
+    if (game.getState().moveHistory.length > 2) {
+      let mH = []
+      let sB = game.getState().snakeBody
 
-    mH.unshift([[0, 0], moveDirection])
+      // Append last 3 moves from history
+      for (let i = 0; i < 3; i++) {
+        const elem = game.getState().moveHistory[i]
+        mH.push([elem.position, elem.direction])
+      }
 
-    const ism = () => {
-      mH.map((mV) => {
-        mVs = mVs.filter((m) => m !== mV[1])
+      let hashSquares = {}
+      squareMoves.map((m, i) => {
+        hashSquares[squareMoves[i]] = i
       })
 
-      totalDistance = mH.reduce((total, mH) => {
-        return calcD(total, mH[0])
-      }, 0)
+      let directions = [nextMove[1]]
+      mH.map((m) => directions.push(m[1]))
 
-      totalDistance = calcD(mH[mH.length - 1][0], mH[0][0])
+      let foundSquareSequence = false
 
-      //   console.log(
-      //     Math.abs(totalDistance[0] - totalDistance[1]),
-      //     game.getState().snakeLength
-      //   )
-      return (
-        mVs.length === 0 &&
-        game.getState().snakeLength >
-          Math.abs(totalDistance[0] - totalDistance[1])
-      )
-    }
+      if (hashSquares.hasOwnProperty(directions)) {
+        foundSquareSequence = true
+      }
 
-    if (mH.length === moves.length) {
-      return ism()
+      if (foundSquareSequence) {
+        let hashSB = {}
+        for (var i = 0; i < sB.length; i += 1) {
+          hashSB[sB[i]] = i
+        }
+
+        mH = mH.filter((m) => hashSB.hasOwnProperty(m[0]))
+
+        // Add prosed move
+        // mH.unshift(nextMove)
+
+        console.log(mH.length)
+      }
+
+      return mH.length === 3 && foundSquareSequence
     } else {
-      if (mH.length > moves.length) {
-        mH.pop()
-        return ism()
-      } else return false
+      return false
     }
   }
 
-  const handleMove = () => {
-    if (validMoves.length > 0) {
-      validMoves.map((move) => {
-        if (move[1] !== game.getCurrentDirection()) {
-          if (!isSquareMove(move[1])) {
-            document.getElementById('move').innerText = move[1]
-            // recordMove(move)
-            game.toggleDirection(move[1])
-            // console.log(game.moveHistory.length)
-          }
+  const findValidMoves = () => {
+    let valid = []
+    moves.map((direction) => {
+      if (
+        isValidMove(nextPosition(direction), direction) &&
+        !isSquareMove([nextPosition(direction), direction])
+      ) {
+        valid.push([nextPosition(direction), direction])
+      }
+    })
+    return valid
+  }
+
+  const findBestMove = (possible, d2T, target) => {
+    let best = null
+    let hash = {}
+    // console.log(possible)
+    possible.map((next, idx) => {
+      hash[idx] = d2T - calcD(next[0], target)
+    })
+    // console.log(hash)
+
+    Object.keys(hash).map((k) => {
+      if (hash[k] === 1) {
+        best = possible[k]
+      }
+    })
+    if (best === null) {
+      Object.keys(hash).map((k) => {
+        if (hash[k] === 0) {
+          best = possible[k]
         }
       })
     }
-  }
 
-  const FindValidMove = () => {
-    moves.map((direction) => {
-      if (isValidMove(nextVector(direction), direction)) {
-        validMoves.push([nextVector(direction), direction])
-      }
-    })
+    if (best === null) {
+      Object.keys(hash).map((k) => {
+        if (hash[k] === -1) {
+          best = possible[k]
+        }
+      })
+    }
+
+    return best
   }
   const hunt = () => {
-    validMoves = []
-    const d2T = calcD2T(game.getState().snakePosition)
+    const targetPos = game.getState().pipPosition
+    const snakePos = game.getState().snakePosition
+
+    const d2T = calcD(targetPos, snakePos)
+
     document.getElementById('distance').innerText = d2T
 
-    moves.map((direction) => {
-      const nV = nextVector(direction)
+    let validMoves = findValidMoves()
 
-      if (isValidMove(nV, direction)) {
-        if (calcD2T(nV)[0] < d2T[0] || calcD2T(nV)[1] < d2T[1]) {
-          validMoves.push([nV, direction])
-        }
+    if (validMoves.length > 0) {
+      // console.log(validMoves)
+      const bestMove = findBestMove(validMoves, d2T, targetPos)
+
+      let dir
+      if (bestMove) {
+        dir = bestMove[1]
+        game.toggleDirection(dir)
+      } else {
+        // dir = validMoves[0][1]
       }
-    })
 
-    handleMove()
+      
+
+      document.getElementById('move').innerText = dir
+    }
   }
 
   const gameLoop = (game) => {
@@ -187,61 +215,12 @@ const ai = (game) => {
         'snakePosition'
       ).innerText = game.getState().snakePosition
 
-      let currentMove = [
-        game.getState().snakePosition[0] +
-          moveVector(game.getCurrentDirection())[0] *
-            game.getState().scaleFactor, // Width
-        game.getState().snakePosition[1] +
-          moveVector(game.getCurrentDirection())[1] *
-            game.getState().scaleFactor, // Height
-      ]
-
-      if (!isValidMove(currentMove, game.getCurrentDirection())) {
-        FindValidMove()
-        handleMove()
-      } else {
-        hunt()
-      }
+      hunt()
     }
 
-    // const recordMove = (moveArr) => {
-    //     if(moveHistory.length < moveHistorySize){
-    //         moveHistory.unshift(moveArr)
-    //     }else{
-    //         moveHistory.unshift(moveArr)
-    //         moveHistory.pop()
-    //     }
-    // }
-
-    // if (validMoves.length > 0) {
-    //
-    //     if(validMoves[0][1] !== game.getCurrentDirection()) {
-    //         document.getElementById('move').innerText = validMoves[0][1]
-    //
-    //         const defaultMove = () => {
-    //             recordMove([validMoves[0][0], validMoves[0][1]])
-    //             game.toggleDirection(validMoves[0][1])
-    //         }
-    //
-    //         if(validMoves.length > 1){
-    //             if(!isSquareMove(validMoves[0][1])){
-    //                 defaultMove()
-    //             }else {
-    //                 recordMove([validMoves[1][0], validMoves[1][1]])
-    //                 game.toggleDirection(validMoves[1][1])
-    //             }
-    //         }else{
-    //            defaultMove()
-    //         }
-    //
-    //     }
-    //
-    // }
-
-    // hunt()
     setTimeout(() => {
       gameLoop(game)
-    }, 1000 / game.fps)
+    }, 1000 / game.getState().fps)
   }
 
   requestAnimationFrame(() => gameLoop(game))

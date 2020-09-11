@@ -1,5 +1,3 @@
-// ToDo: Prefer composition / inheritance
-
 const Snake = () => {
   const gameCanvas = document.getElementById('snake'),
     pipCanvas = document.getElementById('pip'),
@@ -41,6 +39,7 @@ const Snake = () => {
   const getState = () => ({
     snakePosition,
     pipPosition,
+    snakeBody,
     powerUpPosition,
     newLevel,
     HIGH_SCORE,
@@ -105,6 +104,7 @@ const Snake = () => {
 
   const stop = () => {
     dead = true
+    console.table(moveHistory)
     document.querySelector('.splash').classList.toggle('js-active')
     document.querySelector('.splash .highscore').classList.remove('js-active')
 
@@ -120,10 +120,10 @@ const Snake = () => {
     return x % multiple === 1
   }
 
-  const isSnakeBody = (coords) => {
+  const isSnakeBody = (vector) => {
     return (
       snakeBody.filter((part) => {
-        return part[0] === coords[0] && part[1] === coords[1]
+        return part[0] === vector[0] && part[1] === vector[1]
       }).length > 0
     )
   }
@@ -191,7 +191,7 @@ const Snake = () => {
             e.preventDefault()
             if (dead) {
               resetGame()
-              document.querySelector('.splash').classList.toggle('js-active')
+
               toggleKeysActive()
               break
             } else {
@@ -201,14 +201,6 @@ const Snake = () => {
         }
       }
     })
-  }
-
-  const logMove = (dir) => {
-    moveHistory.unshift([snakePosition, dir])
-
-    if (moveHistory.length > moves.length) {
-      moveHistory.pop()
-    }
   }
 
   const getCurrentDirection = () => {
@@ -384,6 +376,8 @@ const Snake = () => {
     snakeColor = '#f2f2f2'
     moveHistory = []
 
+    document.querySelector('.splash').classList.add('js-active')
+
     snake.clearRect(0, 0, gameWidth * scaleFactor, gameHeight * scaleFactor)
     pip.clearRect(0, 0, gameWidth * scaleFactor, gameHeight * scaleFactor)
     powerUp.clearRect(0, 0, gameWidth * scaleFactor, gameHeight * scaleFactor)
@@ -524,6 +518,20 @@ const Snake = () => {
     }
   }
 
+  const turbo = (ammount) => {
+    fps = fps + ammount
+  }
+
+  const logMove = (dir) => {
+    moveHistory.unshift({
+      timestamp: Date.now(),
+      direction: dir,
+      position: [...snakePosition],
+      target: pipPosition,
+      length: snakeLength,
+    })
+  }
+
   const gameLoop = () => {
     if (!dead) {
       if (newLevel) {
@@ -532,7 +540,7 @@ const Snake = () => {
 
       snake.fillStyle = snakeColor
 
-      //Update Snake Coords [TIP]
+      //Update Snake Position [TIP]
       snakePosition[0] += move()[0] * scaleFactor
       snakePosition[1] += move()[1] * scaleFactor
 
@@ -569,8 +577,10 @@ const Snake = () => {
       }
 
       //Output
-      // document.getElementById('frames').innerText = `${Math.floor(fps)}`
-      // document.getElementById('length').innerText = snakeLength
+      document.getElementById('fps').innerText = `${
+        Math.floor(fps) || startFPS
+      }`
+      document.getElementById('length').innerText = snakeLength
       document.getElementById('level').innerText = `${level}`
 
       gameLoop()
@@ -583,10 +593,11 @@ const Snake = () => {
     toggleDirection,
     isSnakeBody,
     init,
-    snakePosition,
     moves,
     gameWidth,
     gameHeight,
+    resetGame,
+    turbo,
   }
 }
 

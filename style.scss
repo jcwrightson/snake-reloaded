@@ -13,9 +13,11 @@ body {
   font-family: monospace;
   color: #e6e6e6;
   background-color: #111;
+  display: flex;
 }
 
 main.game {
+  margin: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,7 +29,6 @@ main.game {
     align-items: center;
     width: 100%;
     position: relative;
-    max-width: 900px;
 
     &.title {
       flex-direction: row;
@@ -35,9 +36,8 @@ main.game {
       h1 {
         margin: 3rem 0;
         font-family: 'Major Mono Display', monospace;
-        font-size: 2rem;
-        color: #d93e46;
-        // color: #00f7ad;
+        font-size: 1.8rem;
+        color: #6e2424;
       }
     }
 
@@ -57,12 +57,16 @@ main.game {
       flex-direction: column;
       justify-content: flex-start;
       padding: 0.5rem;
+      display: flex;
+
+      button{
+        margin-bottom: 1rem;
+      }
 
       > div {
         padding: 0.2rem 0rem;
       }
     }
-
   }
 
   .ai-elem {
@@ -90,7 +94,6 @@ main.game {
 
     > div {
       padding: 5px 0;
-      
     }
 
     .highscore {
@@ -137,8 +140,26 @@ button {
   background-color: #d93e46;
   padding: 0.5rem 2rem;
   text-transform: uppercase;
+  font-family: monospace;
+  user-select: none;
+  border-radius: 3px;
+  min-width: 130px;
 
   &.js-active {
     background-color: #85d61bbd;
+  }
+
+  &.normal {
+    background-color: #333;
+    color:#fff;
+  }
+
+  &.turbo {
+    background-color: #333;
+    color:#fff;
+
+    &.active{
+      background-color: rgb(185, 121, 0);
+    }
   }
 }
