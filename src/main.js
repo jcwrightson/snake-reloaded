@@ -1,16 +1,16 @@
 'use strict'
 
 import Snake from './snake'
-import ai from './ai'
+import { ai } from './ai'
 import '../style.scss'
 
 const calcWidth = () => {
-  const w = Math.floor(window.innerWidth / 20 - (window.innerWidth * 0.01))
+  const w = Math.floor(window.innerWidth / 20 - window.innerWidth * 0.01)
   return w
 }
 
 const calcHeight = () => {
-  const h = Math.floor(window.innerHeight / 25 - (window.innerHeight * 0.01) )
+  const h = Math.floor(window.innerHeight / 25 - window.innerHeight * 0.01)
   return h
 }
 
@@ -65,14 +65,14 @@ window.addEventListener('DOMContentLoaded', () => {
   const toggleTurbo = () => {
     document.querySelector('.turbo').classList.add('active')
     turbo++
-    document.querySelector('.turbo').innerText=`Turbo X ${turbo}`
+    document.querySelector('.turbo').innerText = `Turbo X ${turbo}`
     game.turbo(20)
   }
 
   const handleReset = () => {
     turbo = 0
     document.querySelector('.turbo').classList.remove('active')
-    document.querySelector('.turbo').innerText=`Turbo`
+    document.querySelector('.turbo').innerText = `Turbo`
     game.resetGame()
   }
 

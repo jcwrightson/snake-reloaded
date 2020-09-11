@@ -1,4 +1,51 @@
-const ai = (game) => {
+import { squareMoveSequences } from './constants'
+
+export const isSquareMove = (nextMove, history, snake, squareMoves) => {
+  if (history.length > 2) {
+    let mH = []
+    let sB = snake
+
+    // Append last 3 moves from history
+    // [[0,1], "left"]
+    for (let i = 0; i < 3; i++) {
+      const elem = history[i]
+      mH.push([elem.position, elem.direction])
+    }
+
+    let hashSB = {}
+
+    sB.map((part, idx) => {
+      hashSB[part] = idx
+    })
+
+    // Filter out moves that have expired i.e snake body is no longer there
+    mH = mH.filter((m) => hashSB.hasOwnProperty(m[0]))
+
+    let foundSquareSequence = false
+
+    if (mH.length === 3) {
+      let hashSquares = {}
+      squareMoves.map((m, i) => {
+        hashSquares[m] = i
+      })
+
+      let directions = [nextMove[1]]
+      mH.map((m) => directions.push(m[1]))
+
+      if (hashSquares.hasOwnProperty(directions)) {
+        foundSquareSequence = true
+      } else {
+        foundSquareSequence = false
+      }
+    }
+
+    return foundSquareSequence
+  } else {
+    return false
+  }
+}
+
+export const ai = (game) => {
   const moves = game.moves
   let enabled = false
   const moveVector = (dir) => {
@@ -25,8 +72,10 @@ const ai = (game) => {
     game.getState().gameHeight * game.getState().scaleFactor -
     game.getState().scaleFactor
 
-  const withinBounds = (arr) => {
-    return arr[0] <= gW && arr[0] >= 0 && arr[1] <= gH && arr[1] >= 0
+  const withinBounds = (vector) => {
+    return (
+      vector[0] <= gW && vector[0] >= 0 && vector[1] <= gH && vector[1] >= 0
+    )
   }
 
   const nextPosition = (move) => {
@@ -55,16 +104,14 @@ const ai = (game) => {
     }
   }
 
-  const closestVector = (vA, vB) => {
-    if (vA[0] + vA[1] <= vB[0] + vB[1]) {
-      return vA
-    }
-    return vB
-  }
+  // const closestVector = (vA, vB) => {
+  //   if (vA[0] + vA[1] <= vB[0] + vB[1]) {
+  //     return vA
+  //   }
+  //   return vB
+  // }
 
   const isValidMove = (vector, direction) => {
-    //ToDo: Avoid dead ends...
-
     return (
       validDirection(direction) &&
       withinBounds(vector) &&
@@ -73,75 +120,22 @@ const ai = (game) => {
   }
 
   const calcD = (vector1, vector2) => {
-    const x2 = (vector2[0] - vector1[0]) * (vector2[0] - vector1[0]) // x2-x1 squared
+    const x2 = (vector2[0] - vector1[0]) * (vector2[0] - vector1[0])
     const y2 = (vector2[1] - vector1[1]) * (vector2[1] - vector1[1])
-    return Math.round(
-      Math.floor(Math.sqrt(x2 + y2)) / game.getState().scaleFactor
-    )
-  }
-
-  let squareMoves = [
-    ['up', 'right', 'down', 'left'],
-    ['down', 'right', 'up', 'left'],
-    ['up', 'left', 'down', 'right'],
-    ['down', 'left', 'up', 'right'],
-    ['left', 'up', 'right', 'down'],
-    ['left', 'down', 'right', 'up'],
-    ['right', 'up', 'left', 'down'],
-    ['right', 'down', 'left', 'up'],
-  ]
-
-  const isSquareMove = (nextMove) => {
-    if (game.getState().moveHistory.length > 2) {
-      let mH = []
-      let sB = game.getState().snakeBody
-
-      // Append last 3 moves from history
-      for (let i = 0; i < 3; i++) {
-        const elem = game.getState().moveHistory[i]
-        mH.push([elem.position, elem.direction])
-      }
-
-      let hashSquares = {}
-      squareMoves.map((m, i) => {
-        hashSquares[squareMoves[i]] = i
-      })
-
-      let directions = [nextMove[1]]
-      mH.map((m) => directions.push(m[1]))
-
-      let foundSquareSequence = false
-
-      if (hashSquares.hasOwnProperty(directions)) {
-        foundSquareSequence = true
-      }
-
-      if (foundSquareSequence) {
-        let hashSB = {}
-        for (var i = 0; i < sB.length; i += 1) {
-          hashSB[sB[i]] = i
-        }
-
-        mH = mH.filter((m) => hashSB.hasOwnProperty(m[0]))
-
-        // Add prosed move
-        // mH.unshift(nextMove)
-
-        console.log(mH.length)
-      }
-
-      return mH.length === 3 && foundSquareSequence
-    } else {
-      return false
-    }
+    return Math.round(Math.sqrt(x2 + y2) / game.getState().scaleFactor)
   }
 
   const findValidMoves = () => {
     let valid = []
     moves.map((direction) => {
       if (
-        isValidMove(nextPosition(direction), direction) &&
-        !isSquareMove([nextPosition(direction), direction])
+        isValidMove(nextPosition(direction), direction)
+        // !isSquareMove(
+        //   [nextPosition(direction), direction],
+        //   game.getState().moveHistory,
+        //   game.getState().snakeBody,
+        //   squareMoveSequences
+        // )
       ) {
         valid.push([nextPosition(direction), direction])
       }
@@ -149,14 +143,28 @@ const ai = (game) => {
     return valid
   }
 
-  const findBestMove = (possible, d2T, target) => {
+  const findFirstValidMove = () => {
+    moves.map((dir) => {
+      if (isValidMove(nextPosition(dir), dir)) {
+        return game.toggleDirection(dir)
+      }
+    })
+  }
+
+  const findBestMove = (possible) => {
+    const targetPos = game.getState().pipPosition
+    const snakePos = game.getState().snakePosition
+    const d2T = calcD(targetPos, snakePos)
+
     let best = null
     let hash = {}
-    // console.log(possible)
+
+    document.getElementById('distance').innerText = d2T
+
     possible.map((next, idx) => {
-      hash[idx] = d2T - calcD(next[0], target)
+      hash[idx] = d2T - calcD(next[0], targetPos)
     })
-    // console.log(hash)
+
 
     Object.keys(hash).map((k) => {
       if (hash[k] === 1) {
@@ -181,31 +189,35 @@ const ai = (game) => {
 
     return best
   }
-  const hunt = () => {
-    const targetPos = game.getState().pipPosition
-    const snakePos = game.getState().snakePosition
-
-    const d2T = calcD(targetPos, snakePos)
-
-    document.getElementById('distance').innerText = d2T
-
+  const hunt = (moveHistory) => {
     let validMoves = findValidMoves()
+    let currentDrirection = game.getCurrentDirection()
 
-    if (validMoves.length > 0) {
-      // console.log(validMoves)
-      const bestMove = findBestMove(validMoves, d2T, targetPos)
-
-      let dir
-      if (bestMove) {
-        dir = bestMove[1]
-        game.toggleDirection(dir)
-      } else {
-        // dir = validMoves[0][1]
+    // Avoid Bounds
+    if (!isValidMove(nextPosition(currentDrirection), currentDrirection)) {
+      // Corner
+      if (validMoves.length === 1) {
+        return game.toggleDirection(validMoves[0][1])
       }
 
-      
+      // Side
+      if (validMoves.length === 2) {
+        const secondLastMove = moveHistory[1]
+        if (validMoves[0][1] === secondLastMove.direction) {
+          document.getElementById('move').innerText = validMoves[0][1]
+          return game.toggleDirection(validMoves[0][1])
+        } else {
+          document.getElementById('move').innerText = validMoves[1][1]
+          return game.toggleDirection(validMoves[1][1])
+        }
+      }
+    }
 
-      document.getElementById('move').innerText = dir
+    const bestMove = findBestMove(validMoves)
+
+    if (bestMove) {
+      game.toggleDirection(bestMove[1])
+      document.getElementById('move').innerText = bestMove[1]
     }
   }
 
@@ -215,7 +227,7 @@ const ai = (game) => {
         'snakePosition'
       ).innerText = game.getState().snakePosition
 
-      hunt()
+      hunt(game.getState().moveHistory)
     }
 
     setTimeout(() => {
@@ -231,5 +243,3 @@ const ai = (game) => {
     },
   }
 }
-
-export default ai
