@@ -1,5 +1,15 @@
 import { squareMoveSequences } from './constants'
 
+export const getMoveHIstoryFromSnakeBody = (history, snake) => {
+  let hashSnake = {}
+
+  snake.map((part, idx) => {
+    hashSnake[part] = idx
+  })
+
+  return [...history.filter((m) => hashSnake.hasOwnProperty(m.position))]
+}
+
 export const isSquareMove = (nextMove, history, snake, squareMoves) => {
   if (history.length > 2) {
     let mH = []
@@ -39,9 +49,22 @@ export const isSquareMove = (nextMove, history, snake, squareMoves) => {
       }
     }
 
-    return foundSquareSequence
+    return mH.length
   } else {
-    return false
+    return 0
+  }
+}
+
+const movesToCheck = (dir) => {
+  switch (dir) {
+    case 'up':
+    case 'down': {
+      return ['left', 'right']
+    }
+    case 'left':
+    case 'right': {
+      return ['up', 'down']
+    }
   }
 }
 
@@ -78,12 +101,12 @@ export const ai = (game) => {
     )
   }
 
-  const nextPosition = (move) => {
+  const nextPosition = (direction, currentPosition) => {
     return [
-      game.getState().snakePosition[0] +
-        moveVector(move)[0] * game.getState().scaleFactor,
-      game.getState().snakePosition[1] +
-        moveVector(move)[1] * game.getState().scaleFactor,
+      currentPosition[0] +
+        moveVector(direction)[0] * game.getState().scaleFactor,
+      currentPosition[1] +
+        moveVector(direction)[1] * game.getState().scaleFactor,
     ]
   }
 
@@ -125,35 +148,48 @@ export const ai = (game) => {
     return Math.round(Math.sqrt(x2 + y2) / game.getState().scaleFactor)
   }
 
-  const findValidMoves = () => {
+  const findValidMoves = (currentPosition) => {
     let valid = []
     moves.map((direction) => {
-      if (
-        isValidMove(nextPosition(direction), direction)
-        // !isSquareMove(
-        //   [nextPosition(direction), direction],
-        //   game.getState().moveHistory,
-        //   game.getState().snakeBody,
-        //   squareMoveSequences
-        // )
-      ) {
-        valid.push([nextPosition(direction), direction])
+      if (isValidMove(nextPosition(direction, currentPosition), direction)) {
+        valid.push([nextPosition(direction, currentPosition), direction])
       }
+      const l = isSquareMove(
+        [nextPosition(direction, currentPosition), direction],
+        game.getState().moveHistory,
+        game.getState().snakeBody,
+        squareMoveSequences
+      )
+
+      const probability = (l / 4) * 100
+      document.getElementById('square').innerText = Math.round(probability) + "%"
     })
     return valid
   }
 
   const findFirstValidMove = () => {
     moves.map((dir) => {
-      if (isValidMove(nextPosition(dir), dir)) {
+      if (isValidMove(nextPosition(dir, game.getState().snakePosition), dir)) {
         return game.toggleDirection(dir)
       }
     })
   }
 
   const findBestMove = (possible) => {
-    const targetPos = game.getState().pipPosition
+    let targetPos = game.getState().pipPosition
     const snakePos = game.getState().snakePosition
+
+    if (game.getState().powerUpActive) {
+      if (
+        calcD(targetPos, snakePos) <
+        calcD(game.getState().powerUpPosition, snakePos)
+      ) {
+        targetPos = game.getState().pipPosition
+      } else {
+        targetPos = game.getState().powerUpPosition
+      }
+    }
+
     const d2T = calcD(targetPos, snakePos)
 
     let best = null
@@ -165,54 +201,84 @@ export const ai = (game) => {
       hash[idx] = d2T - calcD(next[0], targetPos)
     })
 
-
     Object.keys(hash).map((k) => {
       if (hash[k] === 1) {
-        best = possible[k]
+        best = isDeadEnd(possible[k][1], snakePos) ? null : possible[k]
       }
     })
-    if (best === null) {
+    if (!best) {
       Object.keys(hash).map((k) => {
         if (hash[k] === 0) {
-          best = possible[k]
+          best = isDeadEnd(possible[k][1], snakePos) ? null : possible[k]
         }
       })
     }
 
-    if (best === null) {
+    if (!best) {
       Object.keys(hash).map((k) => {
         if (hash[k] === -1) {
-          best = possible[k]
+          best = isDeadEnd(possible[k][1], snakePos) ? null : possible[k]
         }
       })
     }
 
-    return best
-  }
-  const hunt = (moveHistory) => {
-    let validMoves = findValidMoves()
-    let currentDrirection = game.getCurrentDirection()
-
-    // Avoid Bounds
-    if (!isValidMove(nextPosition(currentDrirection), currentDrirection)) {
-      // Corner
-      if (validMoves.length === 1) {
-        return game.toggleDirection(validMoves[0][1])
-      }
-
-      // Side
-      if (validMoves.length === 2) {
-        const secondLastMove = moveHistory[1]
-        if (validMoves[0][1] === secondLastMove.direction) {
-          document.getElementById('move').innerText = validMoves[0][1]
-          return game.toggleDirection(validMoves[0][1])
-        } else {
-          document.getElementById('move').innerText = validMoves[1][1]
-          return game.toggleDirection(validMoves[1][1])
-        }
-      }
+    // console.log(best)
+    if (!best) {
+      console.log('No Best Move: ', possible, hash)
     }
+    return best || possible[0]
+  }
 
+  const isDeadEnd = (nextDirection, currentPosition) => {
+    const searchArea = movesToCheck(nextDirection)
+
+    const searched = [
+      ...searchArea.filter(
+        (s) =>
+          game.isSnakeBody(
+            nextPosition(s, nextPosition(nextDirection, currentPosition))
+          ) ||
+          !withinBounds(
+            nextPosition(s, nextPosition(nextDirection, currentPosition))
+          )
+      ),
+    ]
+
+    // console.log(searched)
+    return searched.length === 2
+  }
+  const hunt = (moveHistory, snakeBody) => {
+    let currentDirection = game.getCurrentDirection()
+    let currentPosition = game.getState().snakePosition
+    let validMoves = findValidMoves(currentPosition)
+
+    // // Avoid Bounds
+    // if (
+    //   !isValidMove(
+    //     nextPosition(currentDirection, currentPosition),
+    //     currentDirection
+    //   )
+    // ) {
+    //   // Corner
+    //   if (validMoves.length === 1) {
+    //     return game.toggleDirection(validMoves[0][1])
+    //   }
+
+    //   // Side
+    //   if (validMoves.length === 2) {
+    //     const secondLastMove = moveHistory[1]
+    //     if (validMoves[0][1] === secondLastMove.direction) {
+    //       document.getElementById('move').innerText = validMoves[0][1]
+    //       return game.toggleDirection(validMoves[0][1])
+    //     } else {
+    //       document.getElementById('move').innerText = validMoves[1][1]
+    //       return game.toggleDirection(validMoves[1][1])
+    //     }
+    //   }
+    // }
+    let possibleDirections = []
+    validMoves.map((m) => possibleDirections.push(m[1]))
+    document.getElementById('moves').innerText = possibleDirections.join(', ')
     const bestMove = findBestMove(validMoves)
 
     if (bestMove) {
@@ -227,7 +293,7 @@ export const ai = (game) => {
         'snakePosition'
       ).innerText = game.getState().snakePosition
 
-      hunt(game.getState().moveHistory)
+      hunt(game.getState().moveHistory, game.getState().snakeBody)
     }
 
     setTimeout(() => {

@@ -33,13 +33,14 @@ const Snake = () => {
     keysActive = true,
     snakeColor = '#f2f2f2',
     backgroundColor = '#232323',
-    pipColor = '#d93e46',
-    moveHistory = []
+    // pipColor = '#d93e46',
+    pipColor = '#bd133d',
+    moveHistory = [],
+    frame = null
 
   const getState = () => ({
     snakePosition,
     pipPosition,
-    snakeBody,
     powerUpPosition,
     newLevel,
     HIGH_SCORE,
@@ -98,8 +99,25 @@ const Snake = () => {
     document.querySelector('.meta').style.fontSize = `${0.1 * scaleFactor}rem`
 
     bindEventListeners()
+  }
+
+  const illuminateCollision = () => {
+    snakeBody.map((part, idx) => {
+      if (idx < 3) {
+        snake.fillStyle = '#ccc'
+        snake.fillRect(part[0], part[1], scaleFactor, scaleFactor)
+      }
+    })
+  }
+
+  const start = () => {
+    snake.fillStyle = snakeColor
+    snake.fillRect(snakePosition[0], snakePosition[1], scaleFactor, scaleFactor)
+    snakeBody.unshift([...snakePosition])
     toggleDirection('down')
-    requestAnimationFrame(gameLoop.bind(this))
+    if (!frame) {
+      frame = requestAnimationFrame(gameLoop.bind(this))
+    }
   }
 
   const stop = () => {
@@ -114,6 +132,8 @@ const Snake = () => {
       localStorage.setItem('SNAKE_HIGH_SCORE', level - 1)
       document.getElementById('highScore').innerText = `${HIGH_SCORE}`
     }
+
+    // illuminateCollision()
   }
 
   const isMultiple = (x, multiple) => {
@@ -191,8 +211,8 @@ const Snake = () => {
             e.preventDefault()
             if (dead) {
               resetGame()
-
               toggleKeysActive()
+              start()
               break
             } else {
               break
@@ -385,6 +405,9 @@ const Snake = () => {
     toggleDirection('down')
 
     document.getElementById('highScore').innerText = `${HIGH_SCORE}`
+
+    start()
+
   }
 
   const buildLevel = () => {

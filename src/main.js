@@ -63,7 +63,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   let turbo = 0
   const toggleTurbo = () => {
-    document.querySelector('.turbo').classList.add('active')
+    document.querySelector('.turbo').classList.add('js-active')
     turbo++
     document.querySelector('.turbo').innerText = `Turbo X ${turbo}`
     game.turbo(20)
@@ -71,7 +71,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const handleReset = () => {
     turbo = 0
-    document.querySelector('.turbo').classList.remove('active')
+    document.querySelector('.turbo').classList.remove('js-active')
     document.querySelector('.turbo').innerText = `Turbo`
     game.resetGame()
   }
