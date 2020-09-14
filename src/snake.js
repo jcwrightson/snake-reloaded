@@ -1,3 +1,5 @@
+import { writeFile } from 'fs-web'
+
 const Snake = () => {
   const gameCanvas = document.getElementById('snake'),
     pipCanvas = document.getElementById('pip'),
@@ -36,7 +38,8 @@ const Snake = () => {
     // pipColor = '#d93e46',
     pipColor = '#bd133d',
     moveHistory = [],
-    frame = null
+    frame = null,
+    writeData = false
 
   const getState = () => ({
     snakePosition,
@@ -66,6 +69,7 @@ const Snake = () => {
     backgroundColor,
     pipColor,
     moveHistory,
+    writeData,
   })
 
   const init = (props) => {
@@ -74,6 +78,7 @@ const Snake = () => {
     scaleFactor = props.scaleFactor || 15
     gameHeight = props.gameHeight || 20
     gameWidth = props.gameWidth || 40
+    writeData = props.writeData
 
     gameCanvas.style.backgroundColor = backgroundColor
     gameCanvas.width = gameWidth * scaleFactor
@@ -101,6 +106,18 @@ const Snake = () => {
     bindEventListeners()
   }
 
+  const saveGameData = (data) => {
+    fetch('http://localhost:5000/save', {
+      method: 'post',
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'Application/json',
+      },
+    })
+      .then(console.log)
+      .catch(console.error)
+  }
+
   const illuminateCollision = () => {
     snakeBody.map((part, idx) => {
       if (idx < 3) {
@@ -123,6 +140,11 @@ const Snake = () => {
   const stop = () => {
     dead = true
     console.table(moveHistory)
+
+    if (writeData) {
+      saveGameData(moveHistory)
+    }
+
     document.querySelector('.splash').classList.toggle('js-active')
     document.querySelector('.splash .highscore').classList.remove('js-active')
 
@@ -132,8 +154,6 @@ const Snake = () => {
       localStorage.setItem('SNAKE_HIGH_SCORE', level - 1)
       document.getElementById('highScore').innerText = `${HIGH_SCORE}`
     }
-
-    // illuminateCollision()
   }
 
   const isMultiple = (x, multiple) => {
@@ -407,7 +427,6 @@ const Snake = () => {
     document.getElementById('highScore').innerText = `${HIGH_SCORE}`
 
     start()
-
   }
 
   const buildLevel = () => {

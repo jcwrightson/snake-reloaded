@@ -127,13 +127,6 @@ export const ai = (game) => {
     }
   }
 
-  // const closestVector = (vA, vB) => {
-  //   if (vA[0] + vA[1] <= vB[0] + vB[1]) {
-  //     return vA
-  //   }
-  //   return vB
-  // }
-
   const isValidMove = (vector, direction) => {
     return (
       validDirection(direction) &&
@@ -222,7 +215,6 @@ export const ai = (game) => {
       })
     }
 
-    // console.log(best)
     if (!best) {
       console.log('No Best Move: ', possible, hash)
     }
@@ -251,34 +243,11 @@ export const ai = (game) => {
     let currentDirection = game.getCurrentDirection()
     let currentPosition = game.getState().snakePosition
     let validMoves = findValidMoves(currentPosition)
-
-    // // Avoid Bounds
-    // if (
-    //   !isValidMove(
-    //     nextPosition(currentDirection, currentPosition),
-    //     currentDirection
-    //   )
-    // ) {
-    //   // Corner
-    //   if (validMoves.length === 1) {
-    //     return game.toggleDirection(validMoves[0][1])
-    //   }
-
-    //   // Side
-    //   if (validMoves.length === 2) {
-    //     const secondLastMove = moveHistory[1]
-    //     if (validMoves[0][1] === secondLastMove.direction) {
-    //       document.getElementById('move').innerText = validMoves[0][1]
-    //       return game.toggleDirection(validMoves[0][1])
-    //     } else {
-    //       document.getElementById('move').innerText = validMoves[1][1]
-    //       return game.toggleDirection(validMoves[1][1])
-    //     }
-    //   }
-    // }
     let possibleDirections = []
+
     validMoves.map((m) => possibleDirections.push(m[1]))
     document.getElementById('moves').innerText = possibleDirections.join(', ')
+
     const bestMove = findBestMove(validMoves)
 
     if (bestMove) {

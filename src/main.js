@@ -25,6 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
     scaleFactor: 15,
     gameHeight: calcHeight(),
     gameWidth: calcWidth() > 60 ? 60 : calcWidth(),
+    writeData: true,
   })
 
   controller = ai(game)
