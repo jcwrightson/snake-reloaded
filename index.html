@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Reloaded</title>
+</head>
+
+<body>
+
+    <main class="game">
+
+        <div class="container title">
+            <h1 class="">Snake Reloaded</h1>
+        </div>
+
+        <div class="container view">
+            <canvas id="snake"></canvas>
+            <canvas id="pip"></canvas>
+            <canvas id="powerup"></canvas>
+            <div class="splash">
+                <div class="highscore">New High Score!!</div>
+                <div class="instructions">Use [Arrow Keys] or [WASD]</div>
+                <div>Press [ENTER] to Start!</div>
+            </div>
+
+            <div class="container meta">
+
+            </div>
+        </div>
+
+        <div class="container ai">
+            <div class="block">
+                <div>Level: <span id="level">0</span></div>
+                <div>High Score: <span id="highScore"></span></div>
+                <div>FPS: <span id="fps"></span></div>
+                <div>Length: <span id="length"></span></div>
+                <div class="ai-elem">Snake Position: <span id="snakePosition"></span></div>
+                <div class="ai-elem">Distance To Target: <span id="distance"></span></div>
+                <div class="ai-elem">Concentric Move Probability: <span id="square"></span></div>
+                <div class="ai-elem">Possible Moves: <span id="moves"></span></div>
+                <div class="ai-elem" style="color:#fff">AI Move: <span id="move"></span></div>
+            </div>
+            <div class="block">
+                <button id="aiBtn">AI Off</button>
+                <span class="ai-elem">
+                    <button id="turbo" class="normal turbo">Turbo</button>
+                </span>
+                <button id="reset" class="reset">RESET</button>
+            </div>
+
+        </div>
+
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <a href="https://jcwrightson.com/">madebywrightson</a>
+        </div>
+    </footer>
+
+<script type="text/javascript" src="main.js"></script></body>
+
+</html>
