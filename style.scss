@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Major+Mono+Display|Inconsolata:200&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Inconsolata:200&display=swap');
 // color: #d93e46;
 $primary-color: #bd133d;
 html,
@@ -14,12 +14,10 @@ body {
 body {
   font-family: monospace;
   color: #e6e6e6;
-  
+
   background-color: #111;
   display: flex;
 }
-
-
 
 main.game {
   margin: auto;
@@ -40,7 +38,7 @@ main.game {
       font-size: 1.2rem;
       h1 {
         margin: 3rem 0;
-        font-family: 'Major Mono Display', monospace;
+        font-family: 'Arial', sans-serif;
         font-size: 1.8rem;
         color: $primary-color;
       }
@@ -58,7 +56,7 @@ main.game {
       align-items: flex-start;
       color: lighten($primary-color, 15%);
 
-      &.bold{
+      &.bold {
         color: '#fff' !important;
       }
     }
@@ -158,15 +156,13 @@ button {
   transition: all 120ms ease-in-out;
   cursor: pointer;
 
-  &.js-active, &:hover {
-    background-color:$primary-color;
+  &.js-active,
+  &:hover {
+    background-color: $primary-color;
     color: #fff;
   }
 
-  &.reset{
-  
-    background-color: darken($primary-color, 20%);;
-    
+  &.reset {
+    background-color: darken($primary-color, 20%);
   }
-
 }
