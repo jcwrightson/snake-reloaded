@@ -1,3 +1,5 @@
+import { writeFile } from 'fs-web'
+
 const Snake = () => {
   const gameCanvas = document.getElementById('snake'),
     pipCanvas = document.getElementById('pip'),
@@ -33,8 +35,11 @@ const Snake = () => {
     keysActive = true,
     snakeColor = '#f2f2f2',
     backgroundColor = '#232323',
-    pipColor = '#d93e46',
-    moveHistory = []
+    // pipColor = '#d93e46',
+    pipColor = '#bd133d',
+    moveHistory = [],
+    frame = null,
+    writeData = false
 
   const getState = () => ({
     snakePosition,
@@ -64,6 +69,7 @@ const Snake = () => {
     backgroundColor,
     pipColor,
     moveHistory,
+    writeData,
   })
 
   const init = (props) => {
@@ -72,6 +78,7 @@ const Snake = () => {
     scaleFactor = props.scaleFactor || 15
     gameHeight = props.gameHeight || 20
     gameWidth = props.gameWidth || 40
+    writeData = props.writeData
 
     gameCanvas.style.backgroundColor = backgroundColor
     gameCanvas.width = gameWidth * scaleFactor
@@ -97,13 +104,47 @@ const Snake = () => {
     document.querySelector('.meta').style.fontSize = `${0.1 * scaleFactor}rem`
 
     bindEventListeners()
+  }
+
+  const saveGameData = (data) => {
+    fetch('http://localhost:5000/save', {
+      method: 'post',
+      body: JSON.stringify(data),
+      headers: {
+        'content-type': 'Application/json',
+      },
+    })
+      .then(console.log)
+      .catch(console.error)
+  }
+
+  const illuminateCollision = () => {
+    snakeBody.map((part, idx) => {
+      if (idx < 3) {
+        snake.fillStyle = '#ccc'
+        snake.fillRect(part[0], part[1], scaleFactor, scaleFactor)
+      }
+    })
+  }
+
+  const start = () => {
+    snake.fillStyle = snakeColor
+    snake.fillRect(snakePosition[0], snakePosition[1], scaleFactor, scaleFactor)
+    snakeBody.unshift([...snakePosition])
     toggleDirection('down')
-    requestAnimationFrame(gameLoop.bind(this))
+    if (!frame) {
+      frame = requestAnimationFrame(gameLoop.bind(this))
+    }
   }
 
   const stop = () => {
     dead = true
     console.table(moveHistory)
+
+    if (writeData) {
+      saveGameData(moveHistory)
+    }
+
     document.querySelector('.splash').classList.toggle('js-active')
     document.querySelector('.splash .highscore').classList.remove('js-active')
 
@@ -190,8 +231,8 @@ const Snake = () => {
             e.preventDefault()
             if (dead) {
               resetGame()
-
               toggleKeysActive()
+              start()
               break
             } else {
               break
@@ -384,6 +425,8 @@ const Snake = () => {
     toggleDirection('down')
 
     document.getElementById('highScore').innerText = `${HIGH_SCORE}`
+
+    start()
   }
 
   const buildLevel = () => {
